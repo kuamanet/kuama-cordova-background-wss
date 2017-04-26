@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="kuama-cordova-background-wss"
+        version="1.0.0">
+
+    <name>Background Service Plugin - Secure Websocket Background Service</name>
+
+    <description>
+        Provides a background service that opens a wss connection with the given parameters, the background service can be registered for
+        the android boot event and can create local notifications
+    </description>
+
+    <license>Apache 2.0</license>
+
+    <engines>
+        <engine name="cordova" version=">=3.0.0"/>
+    </engines>
+
+    <!-- Load in the core background service -->
+    <dependency id="com.megster.cordova.FileChooser" url="http://github.com/don/cordova-filechooser.git"/>
+    <dependency id="cordova-plugin-filepath" url="https://github.com/hiddentao/cordova-plugin-filepath.git"/>
+    <dependency id="cordova-plugin-app-version" url="https://github.com/whiteoctober/cordova-plugin-app-version.git"/>
+    <dependency id="de.flynetworks.websocketclient" url="https://github.com/flynetworks/cordova-websocket-clientcert.git"/>
+    <dependency id="android.support.v4" url="https://github.com/floatinghotpot/cordova-plugin-android-support-v4.git"/>
+
+
+    <!-- android -->
+    <platform name="android">
+
+        <js-module src="www/NotificationsFetcherService.js" name="NotificationsFetcherService">
+            <clobbers target="cordova.plugins.NotificationsFetcherService" />
+        </js-module>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+
+            <receiver android:name="net.kuama.backgroundservice.BootBroadcastReceiver">
+                <intent-filter>
+                    <action android:name="android.intent.action.BOOT_COMPLETED" />
+                    <action android:name="android.intent.action.USER_PRESENT" />
+                    <action android:name="android.intent.action.SCREEN_ON" />
+                </intent-filter>
+            </receiver>
+
+            <service
+                    android:name="net.kuama.backgroundservice.JobService"
+                    android:permission="android.permission.BIND_JOB_SERVICE"
+                    android:exported="true"/>
+
+            <service android:name="net.kuama.backgroundservice.NotificationsWatcher"
+                     android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+                <intent-filter>
+                    <action android:name="android.service.notification.NotificationListenerService" />
+                </intent-filter>
+            </service>
+
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.INTERNET"/>
+            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.WAKE_LOCK" />
+        </config-file>
+
+        <config-file target="config.xml" parent="/*">
+            <feature name="BackgroundServicePlugin">
+                <param name="android-package"
+                       value="net.kuama.backgroundservice.BackgroundServicePlugin"/>
+            </feature>
+        </config-file>
+
+        <source-file src="src/android/BackgroundServicePlugin.java" target-dir="src/net/kuama/backgroundservice/" />
+        <source-file src="src/android/BootBroadcastReceiver.java" target-dir="src/net/kuama/backgroundservice/" />
+        <source-file src="src/android/CertificateData.java" target-dir="src/net/kuama/backgroundservice/" />
+        <source-file src="src/android/JobService.java" target-dir="src/net/kuama/backgroundservice/" />
+        <source-file src="src/android/NetworkUtils.java" target-dir="src/net/kuama/backgroundservice/" />
+        <source-file src="src/android/NotificationsFetcherService.java" target-dir="src/net/kuama/backgroundservice/" />
+        <source-file src="src/android/NotificationsWatcher.java" target-dir="src/net/kuama/backgroundservice/" />
+        <source-file src="src/android/Notificator.java" target-dir="src/net/kuama/backgroundservice/" />
+        <source-file src="src/android/NullHostNameVerifier.java" target-dir="src/net/kuama/backgroundservice/" />
+        <source-file src="src/android/ReflectionHelper.java" target-dir="src/net/kuama/backgroundservice/" />
+        <source-file src="src/android/SSLUtils.java" target-dir="src/net/kuama/backgroundservice/" />
+    </platform>
+
+</plugin>
